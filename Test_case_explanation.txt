@@ -1,0 +1,142 @@
+
+Sweet Shop Management System - Detailed Test Case Explanation
+=============================================================
+
+TEST ENVIRONMENT:
+-----------------
+- Jest as Test Runner
+- MongoDB Memory Server for isolated test DB
+- Supertest for HTTP request simulation
+- Mongoose for schema validation
+
+=============================================================
+API TEST CASES - HOW THEY WORK
+=============================================================
+
+POST /sweets
+------------
+✓ Create a new sweet with valid data:
+  - Sends a complete sweet object
+  - Expects 201 Created
+  - Asserts returned data matches input
+
+✓ Reject invalid sweet (e.g., negative price):
+  - Sends a sweet with negative price
+  - Expects 400 Bad Request (Mongoose validation)
+
+GET /sweets
+-----------
+✓ Return all sweets:
+  - Inserts 3 items before test
+  - GET request should return exactly 3
+
+✓ Search by name:
+  - Queries for "Chocolate"
+  - Response should only include matching names
+
+✓ Filter by category:
+  - GET /sweets/search?category=Candy
+  - Should return only sweets with that category
+
+✓ Filter by price range:
+  - Checks if sweets are within given min/max price
+
+✓ Sort ascending:
+  - sort=price
+  - Lowest priced sweet should be first
+
+✓ Sort descending:
+  - sort=-price
+  - Highest priced sweet should be first
+
+DELETE /sweets/:id
+------------------
+✓ Delete a sweet by ID:
+  - Creates a sweet, then deletes it
+  - Verifies deletion from database
+
+✓ Handle deletion with fake ID:
+  - Attempts to delete non-existent sweet
+  - Expects 404 Not Found
+
+POST /sweets/:id/purchase
+-------------------------
+✓ Reduce quantity:
+  - Sends purchase quantity
+  - Sweet's quantity decreases by given amount
+
+✓ Reject over-purchase:
+  - Attempts to purchase more than available
+  - Expects 400 error
+
+POST /sweets/:id/restock
+------------------------
+✓ Increase quantity:
+  - Sends restock value
+  - Verifies updated quantity
+
+✓ Reject negative restock:
+  - Sends negative number
+  - Should return 400
+
+PUT /sweets/:id
+---------------
+✓ Update sweet fields:
+  - Sends new name, category, price, quantity
+  - Verifies update in response and DB
+
+✓ Update non-existent sweet:
+  - Uses a fake ID
+  - Expects 404 Not Found
+
+✓ Invalid update (negative price):
+  - Sends invalid data
+  - Expects 400 Bad Request
+
+✓ Duplicate name update:
+  - Tries to rename to existing sweet's name
+  - Fails due to unique constraint
+
+=============================================================
+MODEL VALIDATION TEST CASES - HOW THEY WORK
+=============================================================
+
+✓ Save valid sweet:
+  - Creates sweet with all valid fields
+  - Should save and return ID
+
+✓ Missing fields:
+  - Omits required fields
+  - Mongoose throws ValidationError
+
+✓ Invalid category:
+  - Category outside enum list
+  - Mongoose throws ValidationError
+
+✓ Negative price:
+  - Price < 0
+  - ValidationError on price
+
+✓ Negative quantity:
+  - Quantity < 0
+  - ValidationError on quantity
+
+✓ Duplicate sweet name:
+  - Inserts two sweets with same name
+  - Second one throws duplicate key error (code 11000)
+
+=============================================================
+SUMMARY
+=============================================================
+
+| Feature           | Covered | Notes                                 |
+|-------------------|---------|----------------------------------------|
+| Create Sweet      | ✅       | Required fields, duplicate check       |
+| Get Sweet(s)      | ✅       | Filters, search, sorting               |
+| Delete Sweet      | ✅       | Valid and invalid ID handling          |
+| Purchase/Restock  | ✅       | Valid quantity and stock control       |
+| Update Sweet      | ✅       | Full update, invalid & duplicate check |
+| Model Validation  | ✅       | Full schema validation rules           |
+
+All cases covered with proper error handling and business logic enforcement.
+
